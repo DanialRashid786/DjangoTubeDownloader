@@ -1,0 +1,169 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<link rel="stylesheet" href="https://cdn.plyr.io/3.6.3/plyr.css" />
+<script src="https://cdn.plyr.io/3.6.3/plyr.js"></script>
+
+
+
+<div class="row">
+    <div class="col-md-12 mb-5">
+        <h1 class="display-2 text-center">
+            <img src="{% static 'img/logo.png' %}" width="50%">
+        </h1>
+    </div>
+</div>
+
+<!--Input forms-->
+<div class="row">
+    <div class="col-md-6 ml-auto mr-auto">
+        
+        <form  action="" method="post" class="mx-auto my-4" style="max-width: 400px;">
+            {% csrf_token %} 
+            {{ form.url }}
+            <input type="submit" value="Search" class="btn btn-info btn-block mt-3">
+        </form>
+        
+        <!--Message if url is incorrect-->
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+                {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+
+<!--Avoid forms message-->
+<script>
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+</script>
+<!--Video/music info-->
+{% if title %}
+<div class="row">
+    <div class="col-md-6 ml-auto mr-auto mt-5">
+        <h1 class="h1 text-center"><a class="h1 text-center font-weight-bold" href="{{ author_url }}" target="__blank">{{ author }}</a></h1>
+        <h1 class="h3 text-center font-italic">{{ title }}</h1>
+        <h3 class="h3 text-center font-italic"><i class="bi bi-clock-history"></i> : {{ duration }}</h3>
+        <h3 class="h3 text-center font-italic"><i class="bi bi-eye"></i> : {{ views }}</h3>
+
+        
+
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-12 text-center mt-5">
+        <img class="img-fluid" src="{{ thumb }}" alt="Thumbnail Image">
+    </div>
+
+
+    <div class="col-md-12 text-center mt-5">
+        <div>
+            <h3>Video Preview</h3>
+        <iframe
+            id="youtube-video-preview"
+            width="100%"
+            height="400"
+            src=""
+            frameborder="0"
+            allowfullscreen
+        ></iframe>
+        </div>
+       
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Get the YouTube video URL from the Django context
+                var youtubeVideoUrl = "{{ video_url }}";
+        
+                // Extract video ID from YouTube URL using regex
+                var regexResult = youtubeVideoUrl.match(/[?&]v=([^&]+)/);
+                var youtubeVideoId = regexResult ? regexResult[1] : null;
+        
+                if (youtubeVideoId) {
+                    // Construct the YouTube embedded video URL
+                    var videoUrl = "https://www.youtube.com/embed/" + youtubeVideoId;
+        
+                    // Set the iframe source dynamically
+                    document.getElementById("youtube-video-preview").src = videoUrl;
+                } else {
+                    console.error('Failed to extract YouTube video ID from the URL:', youtubeVideoUrl);
+                }
+            });
+        </script>
+        
+         
+        
+                
+    </div>
+
+</div>
+<!--Video download options-->
+
+
+<div class="row">
+    <div class="col-md-6">
+        <p class="h3 text-center mt-5 mb-5">Video</p>
+        <table class="table-responsive mt-5">
+            <thead class="thead-light">
+                <tr align="center">
+                    <th scope="col"><i class="bi bi-aspect-ratio"></i></th>
+                    <th scope="col"><i class="bi bi-files"></i></th>
+                    <th scope="col"><i class="bi bi-file-earmark-play"></i></th>
+                    <th scope="col"><i class="bi bi-download"></i></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stream in streams %}
+                <tr align="center">
+                    {% if stream.resolution == '720p' %}
+                        <td>{{ stream.resolution }} <i class="bi bi-badge-hd" style="color: #ff726f;"></i></td>
+                    {% else %}
+                        <td>{{ stream.resolution }}</td>
+                    {% endif %}
+                    <td>{{ stream.file_size }}</td>
+                    <td>{{ stream.extension }}</td>
+                    <td>
+                        <a class="btn btn-info btn-block" href="{{ stream.video_url }}" target="_blank" download="{{ stream.file_name }}">Download</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <!--Audio only download options-->
+</div>
+
+
+
+<div class="col-md-6">
+        <p class="h3 text-center mt-5 mb-5">Audio Only</p>
+        <table class="table-responsive mt-5 mb-5">
+            <thead class="thead-light">
+                <tr align="center">
+                    <th scope="col"><i class="bi bi-music-note-beamed"></i></th>
+                    <th scope="col"><i class="bi bi-files"></i></th>
+                    <th scope="col"><i class="bi bi-file-earmark-music"></i></th>
+                    <th scope="col"><i class="bi bi-download"></i></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stream in stream_audio %}
+                <tr align="center">
+                    <td>{{ stream.resolution }}</td>
+                    <td>{{ stream.file_size }}</td>
+                    <td>{{ stream.extension }}</td>
+                    <td>
+                        <a class="btn btn-info btn-block" href="{{ stream.video_url }}" target="_blank" download="{{ stream.file_name }}">Download</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{% endif %}
+{% endblock %}
